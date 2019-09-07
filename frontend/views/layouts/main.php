@@ -18,7 +18,7 @@ use yii\helpers\Html;
     <link type="text/css" rel="stylesheet" href="/css/materialize.icon.css" media="screen,projection"/>
     <script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="/js/materialize.min.js"></script>
-    <script type="text/javascript" src="/js/vue.min.js"></script>
+    <script type="text/javascript" src="/js/qrcode.min.js"></script>
     <?php $this->head() ?>
 </head>
 <body>

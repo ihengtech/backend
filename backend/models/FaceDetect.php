@@ -15,6 +15,7 @@ use Yii;
  */
 class FaceDetect extends \yii\db\ActiveRecord
 {
+
     /**
      * {@inheritdoc}
      */
