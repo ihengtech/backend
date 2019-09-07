@@ -15,7 +15,7 @@ $this->title = 'Face Detect';
                     <div class="file-field input-field">
                         <div class="btn btn-large waves-effect waves-light red">
                             <span>拍照</span>
-                            <input type="file" name="filename">
+                            <input type="file" name="filename"  accept="image/*" capture="camera">
                         </div>
                     </div>
                 </form>
