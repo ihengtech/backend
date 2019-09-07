@@ -43,7 +43,6 @@ class m190907_032819_create_user_table extends Migration
         $this->createIndex('mobile_phone_index', '{{%user}}', ['mobile_phone']);
         $this->createIndex('username_index', '{{%user}}', ['username']);
         $this->createIndex('access_token_index', '{{%user}}', ['access_token']);
-
     }
 
     /**
