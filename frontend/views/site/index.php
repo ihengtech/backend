@@ -1,53 +1,121 @@
 <?php
 
 /* @var $this yii\web\View */
+/* @var $faceDetectForm frontend\models\FaceDetectForm */
 
-$this->title = 'My Yii Application';
+$this->title = 'Face Detect';
+
 ?>
-<div class="site-index">
 
-    <div class="jumbotron">
-        <h1>Congratulations!</h1>
-
-        <p class="lead">You have successfully created your Yii-powered application.</p>
-
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
-    </div>
-
-    <div class="body-content">
-
-        <div class="row">
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col s12">
+            <div id="face-area">
+                <form action="/site/face-detect" id="face-detect-form">
+                    <div class="file-field input-field">
+                        <div class="btn btn-large waves-effect waves-light red">
+                            <span>拍照</span>
+                            <input type="file" name="filename">
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-
+    </div>
+    <div class="row">
+        <div class="col s12 m7">
+            <div class="card face-detect" id="face-detect">
+                <div class="card-image" id="face-detect-img">
+                    <img src="/images/avatar.jpg">
+                </div>
+                <div class="card-content" id="face-detect-tag">
+                    <p>拍个照吧</p>
+                </div>
+                <div class="card-action">
+                    <div class="carousel" id="merchandise-list" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var getCsrfData = function () {
+            var key = $("meta[name='csrf-param']").attr("content");
+            var data = {};
+            data[key] = $("meta[name='csrf-token']").attr("content");
+            return data;
+        };
+        $("#face-detect-form").on("change", function () {
+            var requestData = getCsrfData();
+            $.ajax({
+                url: '/site/face-detect',
+                data: requestData,
+                type: 'POST',
+                success: function (response) {
+                    $("#face-detect-img").html('<img src="' + response.data.image + '" />');
+                    $("#face-detect-tag").html("");
+                    $.each(response.data.result, function(name, value) {
+                        $("#face-detect-tag").append('<a href="#" class="waves-effect purple btn-small">' + name + " " + value + '</a>');
+                    });
+                    $.ajax({
+                        url: '/site/merchandise-recommend',
+                        data: requestData,
+                        type: 'POST',
+                        success: function (response) {
+                            $("#merchandise-list").show();
+                            $("#merchandise-list").html("");
+                            $.each(response.data, function(id, item) {
+                                $("#merchandise-list").append('<a class="carousel-item" href="#' + item.id  +'"><img src="' + item.image + '"></a>');
+                            });
+                            $('.carousel').carousel();
+                            var h = $(document).height()-$(window).height();
+                            $(document).scrollTop(h);
+                        },
+                        error: function (data) {
+                            console.log("error", data);
+                        },
+                    });
+                },
+                error: function (data) {
+                    console.log("error", data);
+                },
+            });
+            return false;
+        });
+
+    });
+</script>
+<style type="text/css">
+    #face-area {
+        padding: 40% 0;
+        text-align: center;
+    }
+
+    .file-field .btn, .file-field .btn-large, .file-field .btn-small {
+        float: none !important;
+    }
+
+    .face-detect-result .card-action a {
+        margin-bottom: 10px;
+    }
+
+    .carousel .carousel-item {
+        width: 100%;
+        height: 100%;
+    }
+
+    .card .card-content a {
+        margin-bottom: 5px;
+        margin-right: 5px;
+    }
+
+    .carousel .carousel-item > img {
+        height: 100%;
+        width: auto !important;
+    }
+
+    .row {
+        margin-bottom: 5px !important;
+    }
+</style>

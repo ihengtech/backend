@@ -1,6 +1,8 @@
 <?php
+
 namespace frontend\controllers;
 
+use frontend\models\FaceDetectForm;
 use frontend\models\ResendVerificationEmailForm;
 use frontend\models\VerifyEmailForm;
 use Yii;
@@ -74,7 +76,68 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $faceDetectForm = new FaceDetectForm();
+        return $this->render('index', [
+            'faceDetectForm' => $faceDetectForm,
+        ]);
+    }
+
+    /**
+     * @return \yii\web\Response
+     */
+    public function actionFaceDetect()
+    {
+        return $this->asJson([
+            'code' => 0,
+            'message' => null,
+            'data' => [
+                'image' => '/images/avatar.jpg',
+                'result' => [
+                    '颜值' => '101分',
+                    '性别' => '男',
+                    '年龄' => '32岁',
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * @return \yii\web\Response
+     */
+    public function actionMerchandiseRecommend()
+    {
+        $result = [
+            [
+                'id' => '1',
+                'url' => 'http://www.jd.com',
+                'image' => '/images/demo1.jpg',
+            ],
+            [
+                'id' => '2',
+                'url' => 'http://www.jd.com',
+                'image' => '/images/demo2.jpg',
+            ],
+            [
+                'id' => '3',
+                'url' => 'http://www.jd.com',
+                'image' => '/images/demo3.jpg',
+            ],
+            [
+                'id' => '4',
+                'url' => 'http://www.jd.com',
+                'image' => '/images/demo4.jpg',
+            ],
+            [
+                'id' => '5',
+                'url' => 'http://www.jd.com',
+                'image' => '/images/demo5.jpg',
+            ],
+        ];
+        return $this->asJson([
+            'code' => 0,
+            'message' => null,
+            'data' => $result,
+        ]);
     }
 
     /**
@@ -216,8 +279,8 @@ class SiteController extends Controller
      * Verify email address
      *
      * @param string $token
-     * @throws BadRequestHttpException
      * @return yii\web\Response
+     * @throws BadRequestHttpException
      */
     public function actionVerifyEmail($token)
     {
