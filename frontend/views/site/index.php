@@ -14,7 +14,7 @@ $this->title = 'Face Detect';
                 <form action="/site/face-detect" id="face-detect-form" name="face-detect-form">
                     <div class="file-field input-field">
                         <div class="btn btn-large waves-effect waves-light red">
-                            <span>拍照</span>
+                            <i class="material-icons left">add_a_photo</i><span>拍照</span>
                             <input type="file" name="filename"  accept="image/*" capture="camera">
                         </div>
                     </div>
@@ -49,6 +49,7 @@ $this->title = 'Face Detect';
         };
         var $merchandiseList = $("#merchandise-list");
         $("#face-detect-form").on("change", function () {
+            M.toast({html: '请稍等...'})
             var csrfData = getCsrfData();
             var formData = new FormData(document.getElementById('face-detect-form'));
             formData.append(csrfData.key, csrfData.value);
