@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use backend\models\FileManage;
 use common\helpers\HttpClient;
 use frontend\models\FaceDetectForm;
 use frontend\models\ResendVerificationEmailForm;
@@ -18,6 +19,7 @@ use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
 use frontend\models\ContactForm;
+use yii\web\UploadedFile;
 
 /**
  * Site controller
@@ -50,6 +52,8 @@ class SiteController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'logout' => ['post'],
+                    'face-detect' => ['post'],
+                    'merchandise-recommend' => ['post'],
                 ],
             ],
         ];
@@ -89,16 +93,54 @@ class SiteController extends Controller
      */
     public function actionFaceDetect()
     {
+        $url = 'http://stage.ihengtech.com:6688/api/image/upload';
+        $fileObject = UploadedFile::getInstanceByName('filename');
+        $age = 25;
+        $sex = 1;
+        if ($fileObject != null) {
+            $dir = FileManage::getUploadDir();
+            $filename = md5(microtime()) . rand(1, 100) . '.' . $fileObject->getExtension();
+            if ($fileObject->saveAs($dir . $filename)) {
+                if (is_file($dir . $filename)) {
+                    $httpClient = new HttpClient();
+                    $data = $httpClient->post($url, ['file' => curl_file_create($dir . $filename)], [], [], false);
+                    $content = [];
+                    try {
+                        $json = Json::decode($data['content']);
+                    } catch (\Throwable $e) {
+                        $json = [];
+                    }
+                    if (isset($json['content'])) {
+                        try {
+                            $content = Json::decode($json['content']);
+                        } catch (\Throwable $e) {
+                            $content = [];
+                        }
+                    }
+                    $age = isset($content['age']['0']) ? $content['age']['0'] : 25;
+                    $sex = isset($content['gender']['0']) ? $content['gender']['0'] : 0;
+                    if ($sex == 1) {
+                        $sex = 0;
+                    } else {
+                        $sex = 1;
+                    }
+                }
+            }
+        }
         return $this->asJson([
             'code' => 0,
             'message' => null,
             'data' => [
-                'image' => '/images/avatar.jpg',
+                'image' => '/upload/images/' . $filename,
                 'result' => [
-                    '颜值' => '101分',
-                    '性别' => '男',
-                    '年龄' => '32岁',
+                    //'颜值' => '101分',
+                    '性别' => $sex == 0 ? '男' : '女',
+                    '年龄' => $age . '岁',
                 ],
+                'params' => [
+                    'sex' => $sex,
+                    'age' => $age,
+                ]
             ],
         ]);
     }
@@ -110,7 +152,7 @@ class SiteController extends Controller
     {
         $age = intval(Yii::$app->request->post('age'));
         $sex = intval(Yii::$app->request->post('sex'));
-        $url = 'http://stage.ihengtech.com:6688/api/commodity/get/url/%7Bsex%7D/%7Bage%7D?age='. $age .'&sex=' . $sex;
+        $url = 'http://stage.ihengtech.com:6688/api/commodity/get/url/%7Bsex%7D/%7Bage%7D?age=' . $age . '&sex=' . $sex;
         $httpClient = new HttpClient();
         $data = $httpClient->post($url);
         try {
@@ -118,7 +160,7 @@ class SiteController extends Controller
         } catch (\Throwable $e) {
             $json = [];
         }
-        $resultUrl = isset($json['content']) ? $json['content'] : null;
+        $resultUrl = isset($json['content']) ? $json['content'] : 'http://www.jd.com';
         $result = [
             [
                 'id' => '1',

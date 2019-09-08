@@ -66,8 +66,8 @@ $this->title = 'Face Detect';
                     });
                     var requestData = {};
                     requestData[csrfData.key] = csrfData.value;
-                    requestData.age = 32;
-                    requestData.sex = 0;
+                    requestData.age = response.data.params.age;
+                    requestData.sex = response.data.params.sex;
                     $.ajax({
                         url: '/site/merchandise-recommend',
                         data: requestData,

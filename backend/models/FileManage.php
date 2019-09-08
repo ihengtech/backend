@@ -55,6 +55,16 @@ class FileManage extends \yii\db\ActiveRecord
         ];
     }
 
+    public static function getUploadDir()
+    {
+        return Yii::getAlias('@frontend') . DIRECTORY_SEPARATOR . 'web' . DIRECTORY_SEPARATOR . 'upload' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR;
+    }
+
+    public static function getUrlPath($file = null)
+    {
+        return 'upload/images/' . $file;
+    }
+
     /**
      * {@inheritdoc}
      * @return FileManageQuery the active query used by this AR class.
