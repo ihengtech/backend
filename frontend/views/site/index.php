@@ -11,7 +11,7 @@ $this->title = 'Face Detect';
     <div class="row">
         <div class="col s12">
             <div id="face-area">
-                <form action="/site/face-detect" id="face-detect-form" name="face-detect-form">
+                <form action="/site/face-detect" method="post" enctype="multipart/form-data" id="face-detect-form" name="face-detect-form" >
                     <div class="file-field input-field">
                         <div class="btn btn-large waves-effect waves-light red">
                             <i class="material-icons left">add_a_photo</i><span id="take-picture">拍照</span>
