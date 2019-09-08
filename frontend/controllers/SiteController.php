@@ -104,7 +104,7 @@ class SiteController extends Controller
             if ($fileObject->saveAs($dir . $filename)) {
 
                 $tmpfile = $dir . $filename;
-                if ($fileObject->size > 2000000) {
+                if ($fileObject->size > 1200000) {
                     if (FileManage::compressImage($tmpfile, $filename, 0.5) === true) {
                         $tmpfile = $dir . DIRECTORY_SEPARATOR . 'compress' . DIRECTORY_SEPARATOR . $filename;
                     }
