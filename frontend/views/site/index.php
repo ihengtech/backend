@@ -11,7 +11,7 @@ $this->title = 'Face Detect';
     <div class="row">
         <div class="col s12">
             <div id="face-area">
-                <form action="/site/face-detect" id="face-detect-form">
+                <form action="/site/face-detect" id="face-detect-form" name="face-detect-form">
                     <div class="file-field input-field">
                         <div class="btn btn-large waves-effect waves-light red">
                             <span>拍照</span>
@@ -32,7 +32,7 @@ $this->title = 'Face Detect';
                     <p>拍个照吧</p>
                 </div>
                 <div class="card-action">
-                    <div class="carousel" id="merchandise-list" style="display: none;"></div>
+                    <div class="carousel-deprecated" id="merchandise-list" style="display: none;"></div>
                 </div>
             </div>
         </div>
@@ -41,24 +41,31 @@ $this->title = 'Face Detect';
 <script type="text/javascript">
     $(document).ready(function () {
         var getCsrfData = function () {
-            var key = $("meta[name='csrf-param']").attr("content");
-            var data = {};
-            data[key] = $("meta[name='csrf-token']").attr("content");
+            var data = {
+                key: $("meta[name='csrf-param']").attr("content"),
+                value: $("meta[name='csrf-token']").attr("content")
+            };
             return data;
         };
         var $merchandiseList = $("#merchandise-list");
         $("#face-detect-form").on("change", function () {
-            var requestData = getCsrfData();
+            var csrfData = getCsrfData();
+            var formData = new FormData(document.getElementById('face-detect-form'));
+            formData.append(csrfData.key, csrfData.value);
             $.ajax({
                 url: '/site/face-detect',
-                data: requestData,
+                data: formData,
                 type: 'POST',
+                processData: false,
+                contentType: false,
                 success: function (response) {
                     $("#face-detect-img").html('<img src="' + response.data.image + '" />');
                     $("#face-detect-tag").html("");
                     $.each(response.data.result, function(name, value) {
                         $("#face-detect-tag").append('<a href="#" class="waves-effect purple btn-small">' + name + " " + value + '</a>');
                     });
+                    var requestData = {};
+                    requestData[csrfData.key] = csrfData.value;
                     requestData.age = 32;
                     requestData.sex = 0;
                     $.ajax({

@@ -125,11 +125,6 @@ class SiteController extends Controller
                 'url' => $resultUrl,
                 'image' => null,
             ],
-            [
-                'id' => '2',
-                'url' => $resultUrl,
-                'image' => null,
-            ]
         ];
         return $this->asJson([
             'code' => 0,
