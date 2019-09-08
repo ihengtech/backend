@@ -66,6 +66,55 @@ class FileManage extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param $src
+     * @param int $percent
+     * @param $saveFilename
+     * @param string $saveDir
+     * @return bool|string
+     */
+    public static function compressImage($src, $saveFilename, $percent = 1)
+    {
+        if (!is_file($src)) {
+            return false;
+        }
+        if (!extension_loaded('gd')) {
+            return false;
+        }
+        list($width, $height, $type, $attr) = getimagesize($src);
+        $imageInfo = [
+            'width' => $width,
+            'height' => $height,
+            'type' => image_type_to_extension($type, false),
+            'attr' => $attr,
+        ];
+        $functionName = strtolower('imagecreatefrom' . $imageInfo['type']);
+        if (!function_exists($functionName)) {
+            return false;
+        }
+        $sourceImage = $functionName($src);
+        $resizeWidth = floor($imageInfo['width'] * $percent);
+        $resizeHeight = floor($imageInfo['height'] * $percent);
+        $distImage = imagecreatetruecolor($resizeWidth, $resizeHeight);
+        imagecopyresampled($distImage, $sourceImage, 0, 0, 0, 0, $resizeWidth, $resizeHeight, $imageInfo['width'], $imageInfo['height']);
+        imagedestroy($sourceImage);
+        $saveFunction = strtolower('image' . $imageInfo['type']);
+        if (!function_exists($saveFunction)) {
+            return false;
+        }
+        $tmpPath = FileManage::getUploadDir() . DIRECTORY_SEPARATOR . 'compress';
+        if (!is_dir($tmpPath)) {
+            mkdir($tmpPath);
+        }
+        if (!is_dir($tmpPath)) {
+            return false;
+        }
+        $tmpFile = $tmpPath . DIRECTORY_SEPARATOR . $saveFilename;
+        $saveFunction($distImage, $tmpFile);
+        imagedestroy($distImage);
+        return true;
+    }
+
+    /**
      * {@inheritdoc}
      * @return FileManageQuery the active query used by this AR class.
      */

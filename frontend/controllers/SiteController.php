@@ -95,15 +95,23 @@ class SiteController extends Controller
     {
         $url = 'http://stage.ihengtech.com:6688/api/image/upload';
         $fileObject = UploadedFile::getInstanceByName('filename');
-        $age = 25;
-        $sex = 1;
+        $age = null;
+        $sex = null;
         if ($fileObject != null) {
             $dir = FileManage::getUploadDir();
             $filename = md5(microtime()) . rand(1, 100) . '.' . $fileObject->getExtension();
             if ($fileObject->saveAs($dir . $filename)) {
-                if (is_file($dir . $filename)) {
+
+                $tmpfile = $dir . $filename;
+                if ($fileObject->size > 2000000) {
+                    if (FileManage::compressImage($tmpfile, $filename, 0.5) === true) {
+                        $tmpfile = $dir . DIRECTORY_SEPARATOR . 'compress' . DIRECTORY_SEPARATOR . $filename;
+                    }
+                }
+                if (is_file($tmpfile)) {
                     $httpClient = new HttpClient();
-                    $data = $httpClient->post($url, ['file' => curl_file_create($dir . $filename)], [], [], false);
+                    $data = $httpClient->post($url, ['file' => curl_file_create($tmpfile)], [], [], false);
+                    Yii::error(Json::encode($data));
                     $content = [];
                     try {
                         $json = Json::decode($data['content']);
@@ -117,26 +125,32 @@ class SiteController extends Controller
                             $content = [];
                         }
                     }
-                    $age = isset($content['age']['0']) ? $content['age']['0'] : 25;
-                    $sex = isset($content['gender']['0']) ? $content['gender']['0'] : 0;
+                    $age = isset($content['age']['0']) ? $content['age']['0'] : null;
+                    $sex = isset($content['gender']['0']) ? $content['gender']['0'] : null;
                     if ($sex == 1) {
                         $sex = 0;
-                    } else {
+                    } elseif ($sex !== null && $sex == 0) {
                         $sex = 1;
                     }
                 }
             }
+        }
+        $result = [];
+        if ($sex !== null) {
+            $result['性别'] = $sex == 0 ? '男' : '女';
+        }
+        if ($age !== null) {
+            $result['年龄'] = $age . '岁';
+        }
+        if ($result === []) {
+            $result['无法'] ='识别';
         }
         return $this->asJson([
             'code' => 0,
             'message' => null,
             'data' => [
                 'image' => '/upload/images/' . $filename,
-                'result' => [
-                    //'颜值' => '101分',
-                    '性别' => $sex == 0 ? '男' : '女',
-                    '年龄' => $age . '岁',
-                ],
+                'result' => $result,
                 'params' => [
                     'sex' => $sex,
                     'age' => $age,
@@ -155,6 +169,7 @@ class SiteController extends Controller
         $url = 'http://stage.ihengtech.com:6688/api/commodity/get/url/%7Bsex%7D/%7Bage%7D?age=' . $age . '&sex=' . $sex;
         $httpClient = new HttpClient();
         $data = $httpClient->post($url);
+        Yii::error(Json::encode($data));
         try {
             $json = Json::decode($data['content']);
         } catch (\Throwable $e) {

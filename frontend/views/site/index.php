@@ -14,7 +14,7 @@ $this->title = 'Face Detect';
                 <form action="/site/face-detect" id="face-detect-form" name="face-detect-form">
                     <div class="file-field input-field">
                         <div class="btn btn-large waves-effect waves-light red">
-                            <i class="material-icons left">add_a_photo</i><span>拍照</span>
+                            <i class="material-icons left">add_a_photo</i><span id="take-picture">拍照</span>
                             <input type="file" name="filename"  accept="image/*" capture="camera">
                         </div>
                     </div>
@@ -48,8 +48,10 @@ $this->title = 'Face Detect';
             return data;
         };
         var $merchandiseList = $("#merchandise-list");
+        var $button = $("#take-picture");
         $("#face-detect-form").on("change", function () {
-            M.toast({html: '请稍等...'})
+            M.toast({html: '请稍等...'});
+            $button.html("正在识别中...");
             var csrfData = getCsrfData();
             var formData = new FormData(document.getElementById('face-detect-form'));
             formData.append(csrfData.key, csrfData.value);
@@ -98,12 +100,20 @@ $this->title = 'Face Detect';
                         },
                         error: function (data) {
                             console.log("error", data);
+                            $button.html("拍照");
                         },
+                        complete: function() {
+                            $button.html("拍照");
+                        }
                     });
                 },
                 error: function (data) {
                     console.log("error", data);
+                    $button.html("拍照");
                 },
+                complete: function() {
+                    $button.html("进一步识别中...");
+                }
             });
             return false;
         });
