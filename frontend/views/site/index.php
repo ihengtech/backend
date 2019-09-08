@@ -62,6 +62,7 @@ $this->title = 'Face Detect';
                 processData: false,
                 contentType: false,
                 success: function (response) {
+                    $button.html("进一步识别中...");
                     $("#face-detect-img").html('<img src="' + response.data.image + '" />');
                     $("#face-detect-tag").html("");
                     $.each(response.data.result, function(name, value) {
@@ -112,7 +113,7 @@ $this->title = 'Face Detect';
                     $button.html("拍照");
                 },
                 complete: function() {
-                    $button.html("进一步识别中...");
+                    $button.html("拍照");
                 }
             });
             return false;
