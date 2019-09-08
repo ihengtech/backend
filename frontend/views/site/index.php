@@ -46,6 +46,7 @@ $this->title = 'Face Detect';
             data[key] = $("meta[name='csrf-token']").attr("content");
             return data;
         };
+        var $merchandiseList = $("#merchandise-list");
         $("#face-detect-form").on("change", function () {
             var requestData = getCsrfData();
             $.ajax({
@@ -58,17 +59,32 @@ $this->title = 'Face Detect';
                     $.each(response.data.result, function(name, value) {
                         $("#face-detect-tag").append('<a href="#" class="waves-effect purple btn-small">' + name + " " + value + '</a>');
                     });
+                    requestData.age = 32;
+                    requestData.sex = 0;
                     $.ajax({
                         url: '/site/merchandise-recommend',
                         data: requestData,
                         type: 'POST',
                         success: function (response) {
-                            $("#merchandise-list").show();
-                            $("#merchandise-list").html("");
+                            $merchandiseList.html("");
                             $.each(response.data, function(id, item) {
-                                $("#merchandise-list").append('<a class="carousel-item" href="#' + item.id  +'"><img src="' + item.image + '"></a>');
+                                //$("#merchandise-list").append('<a class="carousel-item" href="#' + item.id  +'"><img src="' + item.image + '"></a>');
+                                $("#merchandise-list").append('<a class="carousel-item" id="qr-code-' + item.id  + '" href="' + item.url  + '" ></a>');
+                            });
+                            $merchandiseList.find(".carousel-item").each(function() {
+                                var id = $(this).attr("id");
+                                var url = $(this).attr("href");
+                                new QRCode(id, {
+                                    text: url,
+                                    width: 300,
+                                    height: 300,
+                                    colorDark : "#000000",
+                                    colorLight : "#ffffff",
+                                    correctLevel : QRCode.CorrectLevel.H
+                                });
                             });
                             $('.carousel').carousel();
+                            $merchandiseList.show();
                             var h = $(document).height()-$(window).height();
                             $(document).scrollTop(h);
                         },
@@ -110,10 +126,12 @@ $this->title = 'Face Detect';
         margin-right: 5px;
     }
 
+    /*
     .carousel .carousel-item > img {
         height: 100%;
         width: auto !important;
     }
+     */
 
     .row {
         margin-bottom: 5px !important;

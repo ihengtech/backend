@@ -2,11 +2,13 @@
 
 namespace frontend\controllers;
 
+use common\helpers\HttpClient;
 use frontend\models\FaceDetectForm;
 use frontend\models\ResendVerificationEmailForm;
 use frontend\models\VerifyEmailForm;
 use Yii;
 use yii\base\InvalidArgumentException;
+use yii\helpers\Json;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -106,32 +108,28 @@ class SiteController extends Controller
      */
     public function actionMerchandiseRecommend()
     {
+        $age = intval(Yii::$app->request->post('age'));
+        $sex = intval(Yii::$app->request->post('sex'));
+        $url = 'http://stage.ihengtech.com:6688/api/commodity/get/url/%7Bsex%7D/%7Bage%7D?age='. $age .'&sex=' . $sex;
+        $httpClient = new HttpClient();
+        $data = $httpClient->post($url);
+        try {
+            $json = Json::decode($data['content']);
+        } catch (\Throwable $e) {
+            $json = [];
+        }
+        $resultUrl = isset($json['content']) ? $json['content'] : null;
         $result = [
             [
                 'id' => '1',
-                'url' => 'http://www.jd.com',
-                'image' => '/images/demo1.jpg',
+                'url' => $resultUrl,
+                'image' => null,
             ],
             [
                 'id' => '2',
-                'url' => 'http://www.jd.com',
-                'image' => '/images/demo2.jpg',
-            ],
-            [
-                'id' => '3',
-                'url' => 'http://www.jd.com',
-                'image' => '/images/demo3.jpg',
-            ],
-            [
-                'id' => '4',
-                'url' => 'http://www.jd.com',
-                'image' => '/images/demo4.jpg',
-            ],
-            [
-                'id' => '5',
-                'url' => 'http://www.jd.com',
-                'image' => '/images/demo5.jpg',
-            ],
+                'url' => $resultUrl,
+                'image' => null,
+            ]
         ];
         return $this->asJson([
             'code' => 0,
