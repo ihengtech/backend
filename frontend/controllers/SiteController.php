@@ -97,6 +97,7 @@ class SiteController extends Controller
         $fileObject = UploadedFile::getInstanceByName('filename');
         $age = null;
         $sex = null;
+        $filename = "avatar.jpg";
         if ($fileObject != null) {
             $dir = FileManage::getUploadDir();
             $filename = md5(microtime()) . rand(1, 100) . '.' . $fileObject->getExtension();
@@ -134,6 +135,8 @@ class SiteController extends Controller
                     }
                 }
             }
+        } else {
+            Yii::error(sprintf("get files error。[get: %s], [post: %s], [files: %s]", Json::encode($_GET), Json::encode($_POST), Json::encode($_FILES)));
         }
         $result = [];
         if ($sex !== null) {
