@@ -59,7 +59,10 @@ $this->title = 'Face Detect';
                 url: '/site/face-detect',
                 data: formData,
                 type: 'POST',
+<<<<<<< HEAD
 		cache: false,
+=======
+>>>>>>> dd829edcb763f49e635e7b257ce872224e16506e
                 processData: false,
                 contentType: false,
                 success: function (response) {
@@ -156,4 +159,8 @@ $this->title = 'Face Detect';
     .row {
         margin-bottom: 5px !important;
     }
+<<<<<<< HEAD
 </style>
+=======
+</style>
+>>>>>>> dd829edcb763f49e635e7b257ce872224e16506e
