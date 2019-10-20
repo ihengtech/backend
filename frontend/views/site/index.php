@@ -11,14 +11,43 @@ $this->title = 'Face Detect';
     <div class="row">
         <div class="col s12">
             <div id="face-area">
-                <form action="/site/face-detect" method="post" enctype="multipart/form-data" id="face-detect-form" name="face-detect-form" >
+                <form action="/site/face-detect" method="post" enctype="multipart/form-data" id="face-detect-form"
+                      name="face-detect-form">
                     <div class="file-field input-field">
                         <div class="btn btn-large waves-effect waves-light red">
                             <i class="material-icons left">add_a_photo</i><span id="take-picture">拍照</span>
-                            <input type="file" name="filename"  accept="image/*" capture="camera">
+                            <input type="file" name="filename" accept="image/*" capture="camera">
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+        <div class="col s12 m7">
+            <div class="card">
+                <div class="card-image">
+                    <img src="/images/avatar.jpg">
+                </div>
+                <div class="card-content">
+                    <p>I am a very simple card. I am good at containing small bits of information.
+                        I am convenient because I require little markup to use effectively.</p>
+                </div>
+                <div class="card-action">
+                    <a href="#">This is a link</a>
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m7">
+            <div class="card">
+                <div class="card-image">
+                    <img src="/images/avatar.jpg">
+                </div>
+                <div class="card-content">
+                    <p>I am a very simple card. I am good at containing small bits of information.
+                        I am convenient because I require little markup to use effectively.</p>
+                </div>
+                <div class="card-action">
+                    <a href="#">This is a link</a>
+                </div>
             </div>
         </div>
     </div>
@@ -59,17 +88,14 @@ $this->title = 'Face Detect';
                 url: '/site/face-detect',
                 data: formData,
                 type: 'POST',
-<<<<<<< HEAD
-		cache: false,
-=======
->>>>>>> dd829edcb763f49e635e7b257ce872224e16506e
+                cache: false,
                 processData: false,
                 contentType: false,
                 success: function (response) {
                     $button.html("进一步识别中...");
                     $("#face-detect-img").html('<img src="' + response.data.image + '" />');
                     $("#face-detect-tag").html("");
-                    $.each(response.data.result, function(name, value) {
+                    $.each(response.data.result, function (name, value) {
                         $("#face-detect-tag").append('<a href="#" class="waves-effect purple btn-small">' + name + " " + value + '</a>');
                     });
                     var requestData = {};
@@ -82,32 +108,32 @@ $this->title = 'Face Detect';
                         type: 'POST',
                         success: function (response) {
                             $merchandiseList.html("");
-                            $.each(response.data, function(id, item) {
+                            $.each(response.data, function (id, item) {
                                 //$("#merchandise-list").append('<a class="carousel-item" href="#' + item.id  +'"><img src="' + item.image + '"></a>');
-                                $("#merchandise-list").append('<a class="carousel-item" id="qr-code-' + item.id  + '" href="' + item.url  + '" ></a>');
+                                $("#merchandise-list").append('<a class="carousel-item" id="qr-code-' + item.id + '" href="' + item.url + '" ></a>');
                             });
-                            $merchandiseList.find(".carousel-item").each(function() {
+                            $merchandiseList.find(".carousel-item").each(function () {
                                 var id = $(this).attr("id");
                                 var url = $(this).attr("href");
                                 new QRCode(id, {
                                     text: url,
                                     width: 300,
                                     height: 300,
-                                    colorDark : "#000000",
-                                    colorLight : "#ffffff",
-                                    correctLevel : QRCode.CorrectLevel.H
+                                    colorDark: "#000000",
+                                    colorLight: "#ffffff",
+                                    correctLevel: QRCode.CorrectLevel.H
                                 });
                             });
                             $('.carousel').carousel();
                             $merchandiseList.show();
-                            var h = $(document).height()-$(window).height();
+                            var h = $(document).height() - $(window).height();
                             $(document).scrollTop(h);
                         },
                         error: function (data) {
                             console.log("error", data);
                             $button.html("拍照");
                         },
-                        complete: function() {
+                        complete: function () {
                             $button.html("拍照");
                         }
                     });
@@ -116,18 +142,83 @@ $this->title = 'Face Detect';
                     console.log("error", data);
                     $button.html("拍照");
                 },
-                complete: function() {
+                complete: function () {
                     $button.html("拍照");
                 }
             });
             return false;
         });
+        // 多选框更改事件
+        videoSelect.onchange = getStream;
+        //注册拍照按钮的单击事件
+        document.getElementById("capture").addEventListener("click",function(){
+            //绘制画面
+            console.log('点击事件');
+            context.drawImage(video,0,0,480,320);
+        });
+        function getStream(){
 
+            if (window.stream) {
+                window.stream.getTracks().forEach(function(track) {
+                    track.stop();
+                })
+            }
+
+            if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia){
+                //调用用户媒体设备，访问摄像头
+                const constraints = {
+                    audio: true,
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        frameRate: {
+                            ideal: 10,
+                            max: 15
+                        },
+                        deviceId: {exact: videoSelect.value}
+                    }
+                };
+                console.log('获取视频流');
+                getUserMedia(constraints,success,error);
+            } else {
+                alert("你的浏览器不支持访问用户媒体设备");
+            }
+        }
+        // 获取设备音频输出设备与摄像设备，这里我只用到了摄像设备
+        function gotDevices(deviceInfos) {
+            console.log('deviceInfos')
+            console.log('deviceInfos:', deviceInfos);
+            for (let i = 0; i !== deviceInfos.length; i++) {
+                let deviceInfo = deviceInfos[i];
+                var option = document.createElement('option');
+                // console.log(deviceInfo)
+                if (deviceInfo.kind === 'videoinput') {  // audiooutput  , videoinput
+                    option.value = deviceInfo.deviceId;
+                    option.text = deviceInfo.label || 'camera ' + (videoSelect.length + 1);
+                    videoSelect.appendChild(option);
+                }
+            }
+        }
+        //访问用户媒体设备的兼容方法
+        function getUserMedia(constrains,success,error){
+            if(navigator.mediaDevices.getUserMedia){
+                //最新标准API
+                navigator.mediaDevices.getUserMedia(constrains).then(success).catch(error);
+            } else if (navigator.webkitGetUserMedia){
+                //webkit内核浏览器
+                navigator.webkitGetUserMedia(constrains).then(success).catch(error);
+            } else if (navigator.mozGetUserMedia){
+                //Firefox浏览器
+                navagator.mozGetUserMedia(constrains).then(success).catch(error);
+            } else if (navigator.getUserMedia){
+                //旧版API
+                navigator.getUserMedia(constrains).then(success).catch(error);
+            }
+        }
     });
 </script>
 <style type="text/css">
     #face-area {
-        padding: 40% 0;
         text-align: center;
     }
 
@@ -159,8 +250,4 @@ $this->title = 'Face Detect';
     .row {
         margin-bottom: 5px !important;
     }
-<<<<<<< HEAD
 </style>
-=======
-</style>
->>>>>>> dd829edcb763f49e635e7b257ce872224e16506e
