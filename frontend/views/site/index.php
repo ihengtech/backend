@@ -21,17 +21,14 @@ $this->title = 'Face Detect';
             </div>
             <canvas id="canvas" width="320" height="480"></canvas>
         </div>
-        <div class="col s12 m7" style="display: none;">
-            <div class="card">
-                <div class="card-image">
-                    <img src="/images/avatar.jpg">
-                </div>
-                <div class="card-content">
+    </div>
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="card blue-grey darken-1">
+                <div class="card-content white-text">
+                    <span class="card-title">使用说明</span>
                     <p>I am a very simple card. I am good at containing small bits of information.
                         I am convenient because I require little markup to use effectively.</p>
-                </div>
-                <div class="card-action">
-                    <a href="#">This is a link</a>
                 </div>
             </div>
         </div>
@@ -233,6 +230,7 @@ $this->title = 'Face Detect';
         width: 320px;
         height: 480px;
         margin: 0 auto;
+        background-color: lightgrey;
     }
 
     #video-area {
@@ -249,26 +247,5 @@ $this->title = 'Face Detect';
 
     .face-detect-result .card-action a {
         margin-bottom: 10px;
-    }
-
-    .carousel .carousel-item {
-        width: 100%;
-        height: 100%;
-    }
-
-    .card .card-content a {
-        margin-bottom: 5px;
-        margin-right: 5px;
-    }
-
-    /*
-    .carousel .carousel-item > img {
-        height: 100%;
-        width: auto !important;
-    }
-     */
-
-    .row {
-        margin-bottom: 5px !important;
     }
 </style>
