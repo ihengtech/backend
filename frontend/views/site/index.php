@@ -9,28 +9,18 @@ $this->title = 'Face Detect';
 
 <div class="container-fluid">
     <div class="row">
+
         <div class="col s12">
-            <div id="face-area">
-                <form action="/site/face-detect" method="post" enctype="multipart/form-data" id="face-detect-form"
-                      name="face-detect-form">
-                    <div class="file-field input-field">
-                        <div class="btn btn-large waves-effect waves-light red">
-                            <i class="material-icons left">add_a_photo</i><span id="take-picture">拍照</span>
-                            <input type="file" name="filename" accept="image/*" capture="camera">
-                        </div>
-                    </div>
-                </form>
-            </div>
+            <a class="btn waves-effect waves-light red">
+                <i id="capture" class="material-icons left">add_a_photo</i><span id="take-picture">拍照</span>
+            </a>
+            <video id="video" width="320" height="480" autoplay></video>
         </div>
-        <div class="row">
-            <video id="video" width="480" height="320" autoplay></video>
+        <div class="col s12" style="display:none;">
             <div class="select">
                 <label for="videoSource">Video source: </label><select id="videoSource"></select>
-
-                <!-- <button id="open"> 开启摄像头 </button> -->
-                <button id="capture"> 截图 </button>
             </div>
-            <canvas id="canvas" width="480" height="320"></canvas>
+            <canvas id="canvas" width="320" height="480"></canvas>
         </div>
         <div class="col s12 m7">
             <div class="card">
@@ -43,35 +33,6 @@ $this->title = 'Face Detect';
                 </div>
                 <div class="card-action">
                     <a href="#">This is a link</a>
-                </div>
-            </div>
-        </div>
-        <div class="col s12 m7">
-            <div class="card">
-                <div class="card-image">
-                    <img src="/images/avatar.jpg">
-                </div>
-                <div class="card-content">
-                    <p>I am a very simple card. I am good at containing small bits of information.
-                        I am convenient because I require little markup to use effectively.</p>
-                </div>
-                <div class="card-action">
-                    <a href="#">This is a link</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col s12 m7">
-            <div class="card face-detect" id="face-detect">
-                <div class="card-image" id="face-detect-img">
-                    <img src="/images/avatar.jpg">
-                </div>
-                <div class="card-content" id="face-detect-tag">
-                    <p>拍个照吧</p>
-                </div>
-                <div class="card-action">
-                    <div class="carousel-deprecated" id="merchandise-list" style="display: none;"></div>
                 </div>
             </div>
         </div>
@@ -161,6 +122,7 @@ $this->title = 'Face Detect';
     });
 
     $(document).ready(function () {
+
         //访问用户媒体设备的兼容方法
         function getUserMedia(constrains, success, error) {
             if (navigator.mediaDevices.getUserMedia) {
@@ -196,6 +158,7 @@ $this->title = 'Face Detect';
             //将视频流设置为video元素的源
             video.src = CompatibleURL.createObjectURL(stream);
             //播放视频
+            video.muted();
             video.play();
         }
 
@@ -215,10 +178,10 @@ $this->title = 'Face Detect';
             if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
                 //调用用户媒体设备，访问摄像头
                 const constraints = {
-                    audio: true,
+                    audio: false,
                     video: {
-                        width: {ideal: 1280},
-                        height: {ideal: 720},
+                        width: {ideal: 320},
+                        height: {ideal: 480},
                         frameRate: {
                             ideal: 10,
                             max: 15
@@ -265,6 +228,14 @@ $this->title = 'Face Detect';
     });
 </script>
 <style type="text/css">
+
+    #video {
+        display: block;
+        width: 320px;
+        height: 480px;
+        background: green;
+    }
+
     #face-area {
         text-align: center;
     }
