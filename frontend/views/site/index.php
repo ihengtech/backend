@@ -21,6 +21,7 @@ $this->title = 'Face Detect';
             </div>
             <canvas id="canvas" width="320" height="480"></canvas>
         </div>
+
     </div>
     <div class="row">
         <div class="col s12 m6">
@@ -35,87 +36,6 @@ $this->title = 'Face Detect';
     </div>
 </div>
 <script type="text/javascript">
-    $(document).ready(function () {
-        var getCsrfData = function () {
-            var data = {
-                key: $("meta[name='csrf-param']").attr("content"),
-                value: $("meta[name='csrf-token']").attr("content")
-            };
-            return data;
-        };
-        var $merchandiseList = $("#merchandise-list");
-        var $button = $("#take-picture");
-        $("#face-detect-form").on("change", function () {
-            M.toast({html: '请稍等...'});
-            $button.html("正在识别中...");
-            var csrfData = getCsrfData();
-            var formData = new FormData(document.getElementById('face-detect-form'));
-            formData.append(csrfData.key, csrfData.value);
-            $.ajax({
-                url: '/site/face-detect',
-                data: formData,
-                type: 'POST',
-                cache: false,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    $button.html("进一步识别中...");
-                    $("#face-detect-img").html('<img src="' + response.data.image + '" />');
-                    $("#face-detect-tag").html("");
-                    $.each(response.data.result, function (name, value) {
-                        $("#face-detect-tag").append('<a href="#" class="waves-effect purple btn-small">' + name + " " + value + '</a>');
-                    });
-                    var requestData = {};
-                    requestData[csrfData.key] = csrfData.value;
-                    requestData.age = response.data.params.age;
-                    requestData.sex = response.data.params.sex;
-                    $.ajax({
-                        url: '/site/merchandise-recommend',
-                        data: requestData,
-                        type: 'POST',
-                        success: function (response) {
-                            $merchandiseList.html("");
-                            $.each(response.data, function (id, item) {
-                                //$("#merchandise-list").append('<a class="carousel-item" href="#' + item.id  +'"><img src="' + item.image + '"></a>');
-                                $("#merchandise-list").append('<a class="carousel-item" id="qr-code-' + item.id + '" href="' + item.url + '" ></a>');
-                            });
-                            $merchandiseList.find(".carousel-item").each(function () {
-                                var id = $(this).attr("id");
-                                var url = $(this).attr("href");
-                                new QRCode(id, {
-                                    text: url,
-                                    width: 300,
-                                    height: 300,
-                                    colorDark: "#000000",
-                                    colorLight: "#ffffff",
-                                    correctLevel: QRCode.CorrectLevel.H
-                                });
-                            });
-                            $('.carousel').carousel();
-                            $merchandiseList.show();
-                            var h = $(document).height() - $(window).height();
-                            $(document).scrollTop(h);
-                        },
-                        error: function (data) {
-                            console.log("error", data);
-                            $button.html("拍照");
-                        },
-                        complete: function () {
-                            $button.html("拍照");
-                        }
-                    });
-                },
-                error: function (data) {
-                    console.log("error", data);
-                    $button.html("拍照");
-                },
-                complete: function () {
-                    $button.html("拍照");
-                }
-            });
-            return false;
-        });
-    });
 
     $(document).ready(function () {
 
@@ -140,6 +60,13 @@ $this->title = 'Face Detect';
         var videoSelect = document.querySelector('select#videoSource');
         var canvas = document.getElementById("canvas");
         var context = canvas.getContext("2d");
+        var getCsrfData = function () {
+            var data = {
+                key: $("meta[name='csrf-param']").attr("content"),
+                value: $("meta[name='csrf-token']").attr("content")
+            };
+            return data;
+        };
 
 
         // 获取设备摄像信息
@@ -220,6 +147,72 @@ $this->title = 'Face Detect';
             //绘制画面
             console.log('点击事件');
             context.drawImage(video, 0, 0, 480, 320);
+            var fileBase64 = canvas.toDataURL("image/jpeg");
+            M.toast({html: '请稍等...'});
+            var csrfData = getCsrfData();
+            var formData = new FormData();
+            formData.append(csrfData.key, csrfData.value);
+            $.ajax({
+                url: '/site/face-detect',
+                data: formData,
+                type: 'POST',
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $button.html("进一步识别中...");
+                    $("#face-detect-img").html('<img src="' + response.data.image + '" />');
+                    $("#face-detect-tag").html("");
+                    $.each(response.data.result, function (name, value) {
+                        $("#face-detect-tag").append('<a href="#" class="waves-effect purple btn-small">' + name + " " + value + '</a>');
+                    });
+                    var requestData = {};
+                    requestData[csrfData.key] = csrfData.value;
+                    requestData.age = response.data.params.age;
+                    requestData.sex = response.data.params.sex;
+                    $.ajax({
+                        url: '/site/merchandise-recommend',
+                        data: requestData,
+                        type: 'POST',
+                        success: function (response) {
+                            $merchandiseList.html("");
+                            $.each(response.data, function (id, item) {
+                                //$("#merchandise-list").append('<a class="carousel-item" href="#' + item.id  +'"><img src="' + item.image + '"></a>');
+                                $("#merchandise-list").append('<a class="carousel-item" id="qr-code-' + item.id + '" href="' + item.url + '" ></a>');
+                            });
+                            $merchandiseList.find(".carousel-item").each(function () {
+                                var id = $(this).attr("id");
+                                var url = $(this).attr("href");
+                                new QRCode(id, {
+                                    text: url,
+                                    width: 300,
+                                    height: 300,
+                                    colorDark: "#000000",
+                                    colorLight: "#ffffff",
+                                    correctLevel: QRCode.CorrectLevel.H
+                                });
+                            });
+                            $('.carousel').carousel();
+                            $merchandiseList.show();
+                            var h = $(document).height() - $(window).height();
+                            $(document).scrollTop(h);
+                        },
+                        error: function (data) {
+                            console.log("error", data);
+                            $button.html("拍照");
+                        },
+                        complete: function () {
+                            $button.html("拍照");
+                        }
+                    });
+                },
+                error: function (data) {
+                    $button.html("拍照");
+                },
+                complete: function () {
+                    $button.html("拍照");
+                }
+            });
         });
     });
 </script>
@@ -228,7 +221,7 @@ $this->title = 'Face Detect';
     #video {
         display: block;
         width: 320px;
-        height: 480px;
+        height: 426px;
         margin: 0 auto;
         background-color: lightgrey;
     }
