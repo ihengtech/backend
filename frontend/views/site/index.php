@@ -9,8 +9,7 @@ $this->title = 'Face Detect';
 
 <div class="container-fluid">
     <div class="row">
-
-        <div class="col s12">
+        <div class="col s12" id="video-area">
             <a class="btn waves-effect waves-light red">
                 <i id="capture" class="material-icons left">add_a_photo</i><span id="take-picture">拍照</span>
             </a>
@@ -22,7 +21,7 @@ $this->title = 'Face Detect';
             </div>
             <canvas id="canvas" width="320" height="480"></canvas>
         </div>
-        <div class="col s12 m7">
+        <div class="col s12 m7" style="display: none;">
             <div class="card">
                 <div class="card-image">
                     <img src="/images/avatar.jpg">
@@ -233,11 +232,15 @@ $this->title = 'Face Detect';
         display: block;
         width: 320px;
         height: 480px;
-        background: green;
+        margin: 0 auto;
     }
 
-    #face-area {
+    #video-area {
         text-align: center;
+    }
+
+    #video-area a {
+        margin: 5px;
     }
 
     .file-field .btn, .file-field .btn-large, .file-field .btn-small {
