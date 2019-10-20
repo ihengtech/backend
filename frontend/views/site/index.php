@@ -22,6 +22,16 @@ $this->title = 'Face Detect';
                 </form>
             </div>
         </div>
+        <div class="row">
+            <video id="video" width="480" height="320" autoplay></video>
+            <div class="select">
+                <label for="videoSource">Video source: </label><select id="videoSource"></select>
+
+                <!-- <button id="open"> 开启摄像头 </button> -->
+                <button id="capture"> 截图 </button>
+            </div>
+            <canvas id="canvas" width="480" height="320"></canvas>
+        </div>
         <div class="col s12 m7">
             <div class="card">
                 <div class="card-image">
@@ -148,29 +158,67 @@ $this->title = 'Face Detect';
             });
             return false;
         });
-        // 多选框更改事件
-        videoSelect.onchange = getStream;
-        //注册拍照按钮的单击事件
-        document.getElementById("capture").addEventListener("click",function(){
-            //绘制画面
-            console.log('点击事件');
-            context.drawImage(video,0,0,480,320);
-        });
-        function getStream(){
+    });
+
+    $(document).ready(function () {
+        //访问用户媒体设备的兼容方法
+        function getUserMedia(constrains, success, error) {
+            if (navigator.mediaDevices.getUserMedia) {
+                //最新标准API
+                navigator.mediaDevices.getUserMedia(constrains).then(success).catch(error);
+            } else if (navigator.webkitGetUserMedia) {
+                //webkit内核浏览器
+                navigator.webkitGetUserMedia(constrains).then(success).catch(error);
+            } else if (navigator.mozGetUserMedia) {
+                //Firefox浏览器
+                navagator.mozGetUserMedia(constrains).then(success).catch(error);
+            } else if (navigator.getUserMedia) {
+                //旧版API
+                navigator.getUserMedia(constrains).then(success).catch(error);
+            }
+        }
+
+        var video = document.getElementById("video");
+        var videoSelect = document.querySelector('select#videoSource');
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+
+
+        // 获取设备摄像信息
+        navigator.mediaDevices.enumerateDevices().then(gotDevices).then(getStream).catch(handleError);
+
+        //成功的回调函数
+        function success(stream) {
+            console.log('success')
+            window.stream = stream;
+            //兼容webkit内核浏览器
+            var CompatibleURL = window.URL || window.webkitURL;
+            //将视频流设置为video元素的源
+            video.src = CompatibleURL.createObjectURL(stream);
+            //播放视频
+            video.play();
+        }
+
+        //异常的回调函数
+        function error(error) {
+            console.log("访问用户媒体设备失败：", error.name, error.message);
+        }
+
+        function getStream() {
 
             if (window.stream) {
-                window.stream.getTracks().forEach(function(track) {
+                window.stream.getTracks().forEach(function (track) {
                     track.stop();
                 })
             }
 
-            if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia){
+            if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
                 //调用用户媒体设备，访问摄像头
                 const constraints = {
                     audio: true,
                     video: {
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 },
+                        width: {ideal: 1280},
+                        height: {ideal: 720},
                         frameRate: {
                             ideal: 10,
                             max: 15
@@ -179,12 +227,12 @@ $this->title = 'Face Detect';
                     }
                 };
                 console.log('获取视频流');
-                getUserMedia(constraints,success,error);
+                getUserMedia(constraints, success, error);
             } else {
                 alert("你的浏览器不支持访问用户媒体设备");
             }
         }
-        // 获取设备音频输出设备与摄像设备，这里我只用到了摄像设备
+
         function gotDevices(deviceInfos) {
             console.log('deviceInfos')
             console.log('deviceInfos:', deviceInfos);
@@ -198,23 +246,22 @@ $this->title = 'Face Detect';
                     videoSelect.appendChild(option);
                 }
             }
+
+
         }
-        //访问用户媒体设备的兼容方法
-        function getUserMedia(constrains,success,error){
-            if(navigator.mediaDevices.getUserMedia){
-                //最新标准API
-                navigator.mediaDevices.getUserMedia(constrains).then(success).catch(error);
-            } else if (navigator.webkitGetUserMedia){
-                //webkit内核浏览器
-                navigator.webkitGetUserMedia(constrains).then(success).catch(error);
-            } else if (navigator.mozGetUserMedia){
-                //Firefox浏览器
-                navagator.mozGetUserMedia(constrains).then(success).catch(error);
-            } else if (navigator.getUserMedia){
-                //旧版API
-                navigator.getUserMedia(constrains).then(success).catch(error);
-            }
+
+        function handleError(error) {
+            console.log('error:', error)
         }
+
+        videoSelect.onchange = getStream;
+
+        //注册拍照按钮的单击事件
+        document.getElementById("capture").addEventListener("click", function () {
+            //绘制画面
+            console.log('点击事件');
+            context.drawImage(video, 0, 0, 480, 320);
+        });
     });
 </script>
 <style type="text/css">
