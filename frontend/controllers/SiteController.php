@@ -53,7 +53,6 @@ class SiteController extends Controller
                 'actions' => [
                     'logout' => ['post'],
                     'face-detect' => ['post'],
-                    'merchandise-recommend' => ['post'],
                 ],
             ],
         ];
@@ -93,105 +92,46 @@ class SiteController extends Controller
      */
     public function actionFaceDetect()
     {
-        $url = 'http://stage.ihengtech.com:6688/api/image/upload';
-        $fileObject = UploadedFile::getInstanceByName('filename');
-        $age = null;
-        $sex = null;
-        $filename = "avatar.jpg";
-        if ($fileObject != null) {
-            $dir = FileManage::getUploadDir();
-            $filename = md5(microtime()) . rand(1, 100) . '.' . $fileObject->getExtension();
-            if ($fileObject->saveAs($dir . $filename)) {
-
-                $tmpfile = $dir . $filename;
-                if ($fileObject->size > 1200000) {
-                    if (FileManage::compressImage($tmpfile, $filename, 0.5) === true) {
-                        $tmpfile = $dir . DIRECTORY_SEPARATOR . 'compress' . DIRECTORY_SEPARATOR . $filename;
-                    }
-                }
-                if (is_file($tmpfile)) {
-                    $httpClient = new HttpClient();
-                    $data = $httpClient->post($url, ['file' => curl_file_create($tmpfile)], [], [], false);
-                    Yii::error(Json::encode($data));
-                    $content = [];
-                    try {
-                        $json = Json::decode($data['content']);
-                    } catch (\Throwable $e) {
-                        $json = [];
-                    }
-                    if (isset($json['content'])) {
-                        try {
-                            $content = Json::decode($json['content']);
-                        } catch (\Throwable $e) {
-                            $content = [];
-                        }
-                    }
-                    $age = isset($content['age']['0']) ? $content['age']['0'] : null;
-                    $sex = isset($content['gender']['0']) ? $content['gender']['0'] : null;
-                    if ($sex == 1) {
-                        $sex = 0;
-                    } elseif ($sex !== null && $sex == 0) {
-                        $sex = 1;
-                    }
-                }
-            }
-        } else {
-            Yii::error(sprintf("get files error。[get: %s], [post: %s], [files: %s]", Json::encode($_GET), Json::encode($_POST), Json::encode($_FILES)));
-        }
-        $result = [];
-        if ($sex !== null) {
-            $result['性别'] = $sex == 0 ? '男' : '女';
-        }
-        if ($age !== null) {
-            $result['年龄'] = $age . '岁';
-        }
-        if ($result === []) {
-            $result['无法'] ='识别';
-        }
-        return $this->asJson([
-            'code' => 0,
-            'message' => null,
-            'data' => [
-                'image' => '/upload/images/' . $filename,
-                'result' => $result,
-                'params' => [
-                    'sex' => $sex,
-                    'age' => $age,
-                ]
-            ],
-        ]);
-    }
-
-    /**
-     * @return \yii\web\Response
-     */
-    public function actionMerchandiseRecommend()
-    {
-        $age = intval(Yii::$app->request->post('age'));
-        $sex = intval(Yii::$app->request->post('sex'));
-        $url = 'http://stage.ihengtech.com:6688/api/commodity/get/url/%7Bsex%7D/%7Bage%7D?age=' . $age . '&sex=' . $sex;
+        $faceItems = [];
+        $merchandiseItems = [];
+        $rawName = Yii::$app->request->post('raw_name');
+        $apiHost = Yii::$app->params['apiHost'];
+        $accessToken = Yii::$app->params['accessToken'];
+        $header = ['Authorization' => 'Bearer ' . $accessToken];
         $httpClient = new HttpClient();
-        $data = $httpClient->post($url);
-        Yii::error(Json::encode($data));
-        try {
-            $json = Json::decode($data['content']);
-        } catch (\Throwable $e) {
-            $json = [];
+        $data = $httpClient->post($apiHost . '/file-manages', [
+            'raw_name' => $rawName,
+        ], [], $header);
+        if ($data['code'] !== 200) {
+            return $this->asJson([
+                'items' => [],
+            ]);
         }
-        $resultUrl = isset($json['content']) ? $json['content'] : 'http://www.jd.com';
-        $result = [
-            [
-                'id' => '1',
-                'url' => $resultUrl,
-                'image' => null,
-            ],
-        ];
+        $fileManage = Json::decode($data['content']);
+        if (!isset($fileManage['id']) || $fileManage['id'] < 1) {
+            return $this->asJson([
+                'items' => [],
+            ]);
+        }
+        $data = $httpClient->get($apiHost . '/face-detects/api-analysis', [
+            'id' => $fileManage['id'],
+        ], $header);
+        if ($data['code'] == 200) {
+            $faceItems = Json::decode($data['content']);
+        }
+        $data = $httpClient->get($apiHost . '/merchandises/api-wares', [
+            'wareModel' => '温碧泉',
+            'wareType' => '1',
+        ], $header);
+        if ($data['code'] == 200) {
+            $merchandiseItems = Json::decode($data['content']);
+        }
         return $this->asJson([
-            'code' => 0,
-            'message' => null,
-            'data' => $result,
+            'faceItems' => $faceItems,
+            'merchandiseItems' => $merchandiseItems,
         ]);
     }
+
 
     /**
      * Logs in a user.

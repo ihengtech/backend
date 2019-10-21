@@ -8,151 +8,118 @@ $this->title = 'Face Detect';
 ?>
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col s12">
-            <div id="face-area">
-                <form action="/site/face-detect" method="post" enctype="multipart/form-data" id="face-detect-form" name="face-detect-form" >
-                    <div class="file-field input-field">
-                        <div class="btn btn-large waves-effect waves-light red">
-                            <i class="material-icons left">add_a_photo</i><span id="take-picture">拍照</span>
-                            <input type="file" name="filename"  accept="image/*" capture="camera">
-                        </div>
-                    </div>
-                </form>
-            </div>
+    <div class="video-area">
+        <div>
+            <a class="btn waves-effect waves-light red" id="take-a-picture">
+                <i class="material-icons left">add_a_photo</i><span id="take-picture">拍照</span>
+            </a>
+        </div>
+        <div>
+            <video id="video">视频流不可用。</video>
         </div>
     </div>
     <div class="row">
         <div class="col s12 m7">
-            <div class="card face-detect" id="face-detect">
-                <div class="card-image" id="face-detect-img">
-                    <img src="/images/avatar.jpg">
+            <div class="card">
+                <div class="card-image">
+                    <canvas id="canvas"></canvas>
+                    <span class="card-title"></span>
                 </div>
-                <div class="card-content" id="face-detect-tag">
-                    <p>拍个照吧</p>
+                <div class="card-content">
+                    <p></p>
                 </div>
                 <div class="card-action">
-                    <div class="carousel-deprecated" id="merchandise-list" style="display: none;"></div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="card blue-grey darken-1">
+                <div class="card-content white-text">
+                    <span class="card-title">使用说明</span>
+                    <p>I am a very simple card. I am good at containing small bits of information.
+                        I am convenient because I require little markup to use effectively.</p>
+                </div>
+                <div class="card-action">
+                    <a href="#">This is a link</a>
+                    <a href="#">This is a link</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 <script type="text/javascript">
-    $(document).ready(function () {
-        var getCsrfData = function () {
-            var data = {
-                key: $("meta[name='csrf-param']").attr("content"),
-                value: $("meta[name='csrf-token']").attr("content")
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    var video = $("#video").get(0);
+    var canvas = $("#canvas").get(0);
+    var height = 480;
+    var width = 390;
+    height = 40;
+    width = 30;
+    if (navigator.getUserMedia) {
+        navigator.getUserMedia({
+            audio: false,
+            video: {width: width, height: height}
+        }, function (stream) {
+            video.srcObject = stream;
+            video.onloadedmetadata = function (e) {
+                video.play();
             };
-            return data;
-        };
-        var $merchandiseList = $("#merchandise-list");
-        var $button = $("#take-picture");
-        $("#face-detect-form").on("change", function () {
-            M.toast({html: '请稍等...'});
-            $button.html("正在识别中...");
-            var csrfData = getCsrfData();
-            var formData = new FormData(document.getElementById('face-detect-form'));
-            formData.append(csrfData.key, csrfData.value);
-            $.ajax({
-                url: '/site/face-detect',
-                data: formData,
-                type: 'POST',
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    $button.html("进一步识别中...");
-                    $("#face-detect-img").html('<img src="' + response.data.image + '" />');
-                    $("#face-detect-tag").html("");
-                    $.each(response.data.result, function(name, value) {
-                        $("#face-detect-tag").append('<a href="#" class="waves-effect purple btn-small">' + name + " " + value + '</a>');
-                    });
-                    var requestData = {};
-                    requestData[csrfData.key] = csrfData.value;
-                    requestData.age = response.data.params.age;
-                    requestData.sex = response.data.params.sex;
-                    $.ajax({
-                        url: '/site/merchandise-recommend',
-                        data: requestData,
-                        type: 'POST',
-                        success: function (response) {
-                            $merchandiseList.html("");
-                            $.each(response.data, function(id, item) {
-                                //$("#merchandise-list").append('<a class="carousel-item" href="#' + item.id  +'"><img src="' + item.image + '"></a>');
-                                $("#merchandise-list").append('<a class="carousel-item" id="qr-code-' + item.id  + '" href="' + item.url  + '" ></a>');
-                            });
-                            $merchandiseList.find(".carousel-item").each(function() {
-                                var id = $(this).attr("id");
-                                var url = $(this).attr("href");
-                                new QRCode(id, {
-                                    text: url,
-                                    width: 300,
-                                    height: 300,
-                                    colorDark : "#000000",
-                                    colorLight : "#ffffff",
-                                    correctLevel : QRCode.CorrectLevel.H
-                                });
-                            });
-                            $('.carousel').carousel();
-                            $merchandiseList.show();
-                            var h = $(document).height()-$(window).height();
-                            $(document).scrollTop(h);
-                        },
-                        error: function (data) {
-                            console.log("error", data);
-                            $button.html("拍照");
-                        },
-                        complete: function() {
-                            $button.html("拍照");
-                        }
-                    });
-                },
-                error: function (data) {
-                    console.log("error", data);
-                    $button.html("拍照");
-                },
-                complete: function() {
-                    $button.html("拍照");
-                }
-            });
-            return false;
-        });
-
+        }, function (error) {
+            console.log("打开视频失败!");
+        })
+    } else {
+        console.log("浏览器不支持视频");
+    }
+    $("#take-a-picture").on("click", function () {
+        canvas.setAttribute('width', width);
+        canvas.setAttribute('height', height);
+        var context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, width, height);
+        var imageData = canvas.toDataURL('image/jpeg');
+        uploadImage(imageData, setMerchandise);
     });
+
+    function uploadImage(imageData, callback) {
+        var csrfData = getCsrfData();
+        var formData = new FormData();
+        formData.append(csrfData.key, csrfData.value);
+        formData.append("raw_name", imageData);
+        $.ajax({
+            url: '/site/face-detect',
+            data: formData,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                callback(response);
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function setMerchandise(data) {
+        console.log("data", data);
+    }
+
+    function getCsrfData() {
+        return {
+            key: $("meta[name='csrf-param']").attr("content"),
+            value: $("meta[name='csrf-token']").attr("content")
+        };
+    }
+
 </script>
 <style type="text/css">
-    #face-area {
-        padding: 40% 0;
+    .video-area {
         text-align: center;
     }
 
-    .file-field .btn, .file-field .btn-large, .file-field .btn-small {
-        float: none !important;
-    }
-
-    .face-detect-result .card-action a {
-        margin-bottom: 10px;
-    }
-
-    .carousel .carousel-item {
-        width: 100%;
-        height: 100%;
-    }
-
-    .card .card-content a {
-        margin-bottom: 5px;
-        margin-right: 5px;
-    }
-
-    /*
-    .carousel .carousel-item > img {
-        height: 100%;
-        width: auto !important;
-    }
-     */
-
-    .row {
-        margin-bottom: 5px !important;
+    .video-area a {
+        margin: 10px;
     }
 </style>
