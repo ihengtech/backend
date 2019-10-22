@@ -18,7 +18,7 @@ $this->title = 'Face Detect';
             <video id="video">视频流不可用。</video>
         </div>
     </div>
-    <div class="row">
+    <div class="row" id="face-result" style="display: none;">
         <div class="col s12 m7">
             <div class="card">
                 <div class="card-image">
@@ -39,8 +39,7 @@ $this->title = 'Face Detect';
             <div class="card blue-grey darken-1">
                 <div class="card-content white-text">
                     <span class="card-title">使用说明</span>
-                    <p>I am a very simple card. I am good at containing small bits of information.
-                        I am convenient because I require little markup to use effectively.</p>
+                    <p>对准人像，点击拍照。</p>
                 </div>
             </div>
         </div>
@@ -108,6 +107,7 @@ $this->title = 'Face Detect';
             contentType: false,
             success: function (response) {
                 callback(response);
+                $("#face-result").show();
             },
             error: function (error) {
                 console.log(error);
@@ -120,21 +120,25 @@ $this->title = 'Face Detect';
         var $wares = $('#wares');
         $("#face-items").html('');
         $wares.html('');
-        $.each(data.faceItems, function (index, item) {
-            $('<a>', {
-                class: 'waves-effect waves-light btn',
-                html: item.key + ' ' + item.value
-            }).appendTo('#face-items');
-        });
-        $.each(data.merchandiseItems.content, function (index, item) {
-            console.log(item);
-            $html = $($tpl.html());
-            $html.find("img").attr("src", item.urlCode);
-            $html.find(".card-title").html(item.wareModel);
-            $html.find(".card-action a").attr("href", item.waresUrl);
-            $html.find(".card-content p").html(item.wareInfo);
-            $wares.append($html.prop("outerHTML"));
-        });
+        if (data.faceItems) {
+            $.each(data.faceItems, function (index, item) {
+                $('<a>', {
+                    class: 'waves-effect waves-light btn',
+                    html: item.key + ' ' + item.value
+                }).appendTo('#face-items');
+            });
+        }
+        if (data.merchandiseItems && data.merchandiseItems.content) {
+            $.each(data.merchandiseItems.content, function (index, item) {
+                console.log(item);
+                $html = $($tpl.html());
+                $html.find("img").attr("src", item.urlCode);
+                $html.find(".card-title").html(item.wareModel);
+                $html.find(".card-action a").attr("href", item.waresUrl);
+                $html.find(".card-content p").html(item.wareInfo);
+                $wares.append($html.prop("outerHTML"));
+            });
+        }
     }
 
     function getCsrfData() {
