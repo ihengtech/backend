@@ -68,8 +68,6 @@ $this->title = 'Face Detect';
     var canvas = $("#canvas").get(0);
     var height = 480;
     var width = 390;
-    height = 40;
-    width = 30;
     if (navigator.getUserMedia) {
         navigator.getUserMedia({
             audio: false,
@@ -150,6 +148,13 @@ $this->title = 'Face Detect';
 
 </script>
 <style type="text/css">
+
+    #video {
+        height: 480px;
+        width: 390px;
+        background: grey;
+    }
+
     .video-area {
         text-align: center;
     }
