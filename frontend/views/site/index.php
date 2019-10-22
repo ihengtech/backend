@@ -26,12 +26,13 @@ $this->title = 'Face Detect';
                     <span class="card-title"></span>
                 </div>
                 <div class="card-content">
-                    <p></p>
                 </div>
-                <div class="card-action">
+                <div class="card-action" id="face-items">
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row" id="wares">
     </div>
     <div class="row">
         <div class="col s12 m6">
@@ -41,15 +42,27 @@ $this->title = 'Face Detect';
                     <p>I am a very simple card. I am good at containing small bits of information.
                         I am convenient because I require little markup to use effectively.</p>
                 </div>
-                <div class="card-action">
-                    <a href="#">This is a link</a>
-                    <a href="#">This is a link</a>
-                </div>
             </div>
         </div>
     </div>
-
 </div>
+<script type="text/tpl" id="ware-tpl">
+<div class="col s12 m7">
+    <div class="card">
+        <div class="card-image">
+            <img />
+        </div>
+        <div class="card-content">
+        <span class="card-title"></span>
+            <p></p>
+        </div>
+        <div class="card-action">
+            <a href="#" target="_blank">购买</a>
+        </div>
+    </div>
+</div>
+
+</script>
 <script type="text/javascript">
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
     var video = $("#video").get(0);
@@ -103,7 +116,25 @@ $this->title = 'Face Detect';
     }
 
     function setMerchandise(data) {
-        console.log("data", data);
+        var $tpl = $('#ware-tpl');
+        var $wares = $('#wares');
+        $("#face-items").html('');
+        $wares.html('');
+        $.each(data.faceItems, function (index, item) {
+            $('<a>', {
+                class: 'waves-effect waves-light btn',
+                html: item.key + ' ' + item.value
+            }).appendTo('#face-items');
+        });
+        $.each(data.merchandiseItems.content, function (index, item) {
+            console.log(item);
+            $html = $($tpl.html());
+            $html.find("img").attr("src", item.urlCode);
+            $html.find(".card-title").html(item.wareModel);
+            $html.find(".card-action a").attr("href", item.waresUrl);
+            $html.find(".card-content p").html(item.wareInfo);
+            $wares.append($html.prop("outerHTML"));
+        });
     }
 
     function getCsrfData() {
@@ -121,5 +152,10 @@ $this->title = 'Face Detect';
 
     .video-area a {
         margin: 10px;
+    }
+
+    #face-items a {
+        margin-right: 10px;
+        margin-bottom: 15px;
     }
 </style>
