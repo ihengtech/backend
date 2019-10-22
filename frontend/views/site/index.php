@@ -149,7 +149,7 @@ $this->title = 'Face Detect';
 </script>
 <style type="text/css">
 
-    #video {
+    #video, #canvas {
         height: 480px;
         width: 390px;
         background: grey;
