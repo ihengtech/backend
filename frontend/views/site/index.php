@@ -64,10 +64,14 @@ $this->title = 'Face Detect';
 </script>
 <script type="text/javascript">
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-    var video = $("#video").get(0);
-    var canvas = $("#canvas").get(0);
+    var $video = $("#video");
+    var video = $video.get(0);
     var height = 480;
     var width = 390;
+    var canvas = $("#canvas").get(0);
+    var videoOn = true;
+    canvas.setAttribute('width', width);
+    canvas.setAttribute('height', height);
     if (navigator.getUserMedia) {
         navigator.getUserMedia({
             audio: false,
@@ -84,12 +88,19 @@ $this->title = 'Face Detect';
         console.log("浏览器不支持视频");
     }
     $("#take-a-picture").on("click", function () {
-        canvas.setAttribute('width', width);
-        canvas.setAttribute('height', height);
-        var context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0, width, height);
-        var imageData = canvas.toDataURL('image/jpeg');
-        uploadImage(imageData, setMerchandise);
+        if (videoOn === true) {
+            videoOn = false;
+            $video.hide();
+            var context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, width, height);
+            var imageData = canvas.toDataURL('image/jpeg');
+            uploadImage(imageData, setMerchandise);
+            video.stop();
+        } else {
+            videoOn = true;
+            $video.show();
+            video.play();
+        }
     });
 
     function uploadImage(imageData, callback) {
