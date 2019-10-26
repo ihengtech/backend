@@ -88,9 +88,11 @@ $this->title = 'Face Detect';
         console.log("浏览器不支持视频");
     }
     $("#take-a-picture").on("click", function () {
+        $obj = $(this);
         if (videoOn === true) {
             videoOn = false;
             $video.hide();
+            $obj.html("返回拍照");
             var context = canvas.getContext('2d');
             context.drawImage(video, 0, 0, width, height);
             var imageData = canvas.toDataURL('image/jpeg');
@@ -100,6 +102,7 @@ $this->title = 'Face Detect';
             videoOn = true;
             $video.show();
             video.play();
+            $obj.html("拍照");
         }
     });
 
